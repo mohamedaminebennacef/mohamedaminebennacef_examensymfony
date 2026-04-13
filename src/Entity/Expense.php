@@ -27,7 +27,7 @@ class Expense
 
     #[ORM\ManyToOne(inversedBy: 'expenses')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?wallet $wallet = null;
+    private ?Wallet $wallet = null;
 
     public function getId(): ?int
     {
@@ -89,12 +89,12 @@ class Expense
         return $this;
     }
 
-    public function getWallet(): ?wallet
+    public function getWallet(): ?Wallet
     {
         return $this->wallet;
     }
 
-    public function setWallet(?wallet $wallet): static
+    public function setWallet(?Wallet $wallet): static
     {
         $this->wallet = $wallet;
 

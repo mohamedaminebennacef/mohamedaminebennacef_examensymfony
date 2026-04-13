@@ -4,73 +4,173 @@
 
 {% block body %}
     <style>
+        :root {
+            --expense-bg: linear-gradient(135deg, #f5f7fb 0%, #e9eef8 100%);
+            --expense-card: #ffffff;
+            --expense-border: #d8dee6;
+            --expense-head: #f0f4fb;
+            --expense-text: #1f2937;
+            --expense-muted: #6b7280;
+            --expense-danger: #c1121f;
+            --expense-accent: #1d4ed8;
+        }
+
+        body {
+            margin: 0;
+            background: var(--expense-bg);
+            color: var(--expense-text);
+        }
+
         .expense-page {
             max-width: 1100px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: 2.5rem auto;
+            padding: 0 1.2rem;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .expense-page h1 {
+        .expense-header {
             margin-bottom: 1rem;
+        }
+
+        .expense-header h1 {
+            margin: 0;
+            font-size: 1.85rem;
+            letter-spacing: 0.01em;
+        }
+
+        .expense-subtitle {
+            margin-top: 0.3rem;
+            color: var(--expense-muted);
+            font-size: 0.95rem;
+        }
+
+        .expense-card {
+            background: var(--expense-card);
+            border: 1px solid var(--expense-border);
+            border-radius: 14px;
+            padding: 0.85rem;
+            box-shadow: 0 12px 30px rgba(17, 24, 39, 0.06);
+        }
+
+        .expense-table-wrap {
+            overflow-x: auto;
         }
 
         .expense-table {
             width: 100%;
             border-collapse: collapse;
             background-color: #fff;
+            min-width: 780px;
         }
 
         .expense-table th,
         .expense-table td {
-            border: 1px solid #d8dee6;
-            padding: 0.75rem;
+            border: 1px solid var(--expense-border);
+            padding: 0.8rem;
             text-align: left;
-            vertical-align: top;
+            vertical-align: middle;
         }
 
         .expense-table thead {
-            background-color: #f4f6f8;
+            background-color: var(--expense-head);
+        }
+
+        .expense-table thead th {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1f3a5f;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .expense-table tbody tr:nth-child(even) {
+            background: #fbfcff;
+        }
+
+        .expense-table tbody tr:hover {
+            background: #f7faff;
+        }
+
+        .wallet-badge {
+            display: inline-block;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            background: #dbeafe;
+            color: var(--expense-accent);
+            border: 1px solid #bfdbfe;
+            white-space: nowrap;
+        }
+
+        .amount-cell {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
         }
 
         .text-danger {
-            color: #c1121f;
+            color: var(--expense-danger);
             font-weight: 600;
+        }
+
+        .empty-row {
+            text-align: center;
+            color: var(--expense-muted);
+            padding: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .expense-page {
+                margin: 1.5rem auto;
+                padding: 0 0.7rem;
+            }
+
+            .expense-header h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 
     <div class="expense-page">
-        <h1>Liste des depenses</h1>
+        <div class="expense-header">
+            <h1>Liste des depenses</h1>
+            <p class="expense-subtitle">Suivi des montants convertis et alerte visuelle en cas de depassement du solde.</p>
+        </div>
 
-        <table class="expense-table">
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th>Montant original</th>
-                    <th>Date</th>
-                    <th>Portefeuille</th>
-                    <th>Montant converti</th>
-                    <th>Solde portefeuille</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for row in expenseRows %}
-                <tr>
-                    <td>{{ row.expense.description }}</td>
-                    <td>{{ row.expense.amount|number_format(2, '.', ' ') }} {{ row.expense.currency }}</td>
-                    <td>{{ row.expense.date|date('d/m/Y H:i') }}</td>
-                    <td>{{ row.wallet.name }}</td>
-                    <td class="{{ row.isOverBalance ? 'text-danger' : '' }}" style="{{ row.isOverBalance ? 'color: red;' : '' }}">
-                        {{ row.convertedAmount|number_format(2, '.', ' ') }} {{ row.wallet.currency }}
-                    </td>
-                    <td>{{ row.wallet.balance|number_format(2, '.', ' ') }} {{ row.wallet.currency }}</td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="6">Aucune depense enregistree.</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <div class="expense-card">
+            <div class="expense-table-wrap">
+                <table class="expense-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Montant original</th>
+                            <th>Date</th>
+                            <th>Portefeuille</th>
+                            <th>Montant converti</th>
+                            <th>Solde portefeuille</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in expenseRows %}
+                        <tr>
+                            <td>{{ row.expense.description }}</td>
+                            <td class="amount-cell">{{ row.expense.amount|number_format(2, '.', ' ') }} {{ row.expense.currency }}</td>
+                            <td>{{ row.expense.date|date('d/m/Y H:i') }}</td>
+                            <td>
+                                <span class="wallet-badge">{{ row.wallet.name }}</span>
+                            </td>
+                            <td class="amount-cell {{ row.isOverBalance ? 'text-danger' : '' }}" style="{{ row.isOverBalance ? 'color: red;' : '' }}">
+                                {{ row.convertedAmount|number_format(2, '.', ' ') }} {{ row.wallet.currency }}
+                            </td>
+                            <td class="amount-cell">{{ row.wallet.balance|number_format(2, '.', ' ') }} {{ row.wallet.currency }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-row">Aucune depense enregistree.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}
