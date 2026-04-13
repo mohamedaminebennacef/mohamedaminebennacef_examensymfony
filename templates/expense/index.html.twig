@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des depenses{% endblock %}
+
+{% block body %}
+    <style>
+        .expense-page {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .expense-page h1 {
+            margin-bottom: 1rem;
+        }
+
+        .expense-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+        .expense-table th,
+        .expense-table td {
+            border: 1px solid #d8dee6;
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .expense-table thead {
+            background-color: #f4f6f8;
+        }
+
+        .text-danger {
+            color: #c1121f;
+            font-weight: 600;
+        }
+    </style>
+
+    <div class="expense-page">
+        <h1>Liste des depenses</h1>
+
+        <table class="expense-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Montant original</th>
+                    <th>Date</th>
+                    <th>Portefeuille</th>
+                    <th>Montant converti</th>
+                    <th>Solde portefeuille</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in expenseRows %}
+                <tr>
+                    <td>{{ row.expense.description }}</td>
+                    <td>{{ row.expense.amount|number_format(2, '.', ' ') }} {{ row.expense.currency }}</td>
+                    <td>{{ row.expense.date|date('d/m/Y H:i') }}</td>
+                    <td>{{ row.wallet.name }}</td>
+                    <td class="{{ row.isOverBalance ? 'text-danger' : '' }}" style="{{ row.isOverBalance ? 'color: red;' : '' }}">
+                        {{ row.convertedAmount|number_format(2, '.', ' ') }} {{ row.wallet.currency }}
+                    </td>
+                    <td>{{ row.wallet.balance|number_format(2, '.', ' ') }} {{ row.wallet.currency }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">Aucune depense enregistree.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
